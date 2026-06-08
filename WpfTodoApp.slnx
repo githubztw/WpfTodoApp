@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WpfTodoApp.Core/WpfTodoApp.Core.csproj" />
+    <Project Path="src/WpfTodoApp.Modules.Login/WpfTodoApp.Modules.Login.csproj" />
+    <Project Path="src/WpfTodoApp.Modules.TodoList/WpfTodoApp.Modules.TodoList.csproj" />
+    <Project Path="src/WpfTodoApp.Modules.UserManagement/WpfTodoApp.Modules.UserManagement.csproj" />
+    <Project Path="src/WpfTodoApp.Services/WpfTodoApp.Services.csproj" />
+    <Project Path="src/WpfTodoApp/WpfTodoApp.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WpfTodoApp.Core.Tests/WpfTodoApp.Core.Tests.csproj" />
+    <Project Path="tests/WpfTodoApp.Modules.Login.Tests/WpfTodoApp.Modules.Login.Tests.csproj" />
+    <Project Path="tests/WpfTodoApp.Modules.TodoList.Tests/WpfTodoApp.Modules.TodoList.Tests.csproj" />
+    <Project Path="tests/WpfTodoApp.Modules.UserManagement.Tests/WpfTodoApp.Modules.UserManagement.Tests.csproj" />
+    <Project Path="tests/WpfTodoApp.Services.Tests/WpfTodoApp.Services.Tests.csproj" />
+  </Folder>
+</Solution>
