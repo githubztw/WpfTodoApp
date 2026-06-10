@@ -6,6 +6,9 @@ using WpfTodoApp.Services.Interfaces;
 
 namespace WpfTodoApp.Modules.Login.Managers;
 
+/// <summary>
+/// 登录业务管理器。编排认证流程，管理登录成功后的 EventAggregator 事件发布。
+/// </summary>
 public class LoginManager : ManagerBase
 {
     private readonly IAuthService _authService;
@@ -22,28 +25,41 @@ public class LoginManager : ManagerBase
         try
         {
             var result = _authService.Authenticate(username, password);
+
             if (result.Success && !result.IsFirstLogin)
             {
                 _eventAggregator.GetEvent<UserLoggedInEvent>().Publish(
-                    new UserLoggedInEvent.Payload(result.UserId, result.Username, result.IsAdmin));
+                    new UserLoggedInEvent.Payload(
+                        result.UserId, result.Username, result.IsAdmin));
             }
+
             return result;
         }
         catch (Exception ex)
         {
-            return new AuthResult { Success = false, ErrorMessage = HandleError(ex) };
+            return new AuthResult
+            {
+                Success = false,
+                ErrorMessage = HandleError(ex)
+            };
         }
     }
 
-    public ChangePasswordResult ChangePassword(string username, string oldPassword, string newPassword)
+    public ChangePasswordResult ChangePassword(
+        string username, string oldPassword, string newPassword)
     {
         try
         {
-            return _authService.ChangePassword(username, oldPassword, newPassword);
+            return _authService.ChangePassword(
+                username, oldPassword, newPassword);
         }
         catch (Exception ex)
         {
-            return new ChangePasswordResult { Success = false, ErrorMessage = HandleError(ex) };
+            return new ChangePasswordResult
+            {
+                Success = false,
+                ErrorMessage = HandleError(ex)
+            };
         }
     }
 

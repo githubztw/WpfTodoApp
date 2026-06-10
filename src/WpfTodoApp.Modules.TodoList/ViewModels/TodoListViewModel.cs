@@ -1,15 +1,20 @@
 using System.Collections.ObjectModel;
 using Prism.Commands;
 using Prism.Events;
-using Prism.Mvvm;
 using Prism.Regions;
+using WpfTodoApp.Core;
 using WpfTodoApp.Core.Dtos;
 using WpfTodoApp.Core.Events;
+using WpfTodoApp.Core.Interfaces;
 using WpfTodoApp.Modules.TodoList.Managers;
 
 namespace WpfTodoApp.Modules.TodoList.ViewModels;
 
-public class TodoListViewModel : BindableBase, IDisposable
+/// <summary>
+/// 任务列表界面 ViewModel。管理任务的加载、筛选、CRUD 操作，
+/// 通过 IEventAggregator 监听登录事件以加载对应用户的任务。
+/// </summary>
+public class TodoListViewModel : ViewModelBase, IDisposable
 {
     private readonly TodoManager _todoManager;
     private readonly IRegionManager _regionManager;
@@ -18,13 +23,29 @@ public class TodoListViewModel : BindableBase, IDisposable
     public ObservableCollection<TodoItemDto> Todos { get; } = new();
 
     private TodoFilter _currentFilter = TodoFilter.All;
-    public TodoFilter CurrentFilter { get => _currentFilter; set { SetProperty(ref _currentFilter, value); LoadTodos(); } }
+    public TodoFilter CurrentFilter
+    {
+        get => _currentFilter;
+        set
+        {
+            SetProperty(ref _currentFilter, value);
+            LoadTodos();
+        }
+    }
 
     private bool _isLoading;
-    public bool IsLoading { get => _isLoading; set => SetProperty(ref _isLoading, value); }
+    public bool IsLoading
+    {
+        get => _isLoading;
+        set => SetProperty(ref _isLoading, value);
+    }
 
     private string? _errorMessage;
-    public string? ErrorMessage { get => _errorMessage; set => SetProperty(ref _errorMessage, value); }
+    public string? ErrorMessage
+    {
+        get => _errorMessage;
+        set => SetProperty(ref _errorMessage, value);
+    }
 
     public DelegateCommand AddTodoCommand { get; }
     public DelegateCommand<TodoItemDto> EditTodoCommand { get; }
@@ -36,54 +57,109 @@ public class TodoListViewModel : BindableBase, IDisposable
 
     private SubscriptionToken? _loginToken;
 
-    public TodoListViewModel(TodoManager todoManager, IRegionManager regionManager,
-        IEventAggregator eventAggregator)
+    public TodoListViewModel(
+        TodoManager todoManager,
+        IRegionManager regionManager,
+        IEventAggregator eventAggregator,
+        ILogger logger)
+        : base(logger)
     {
         _todoManager = todoManager;
         _regionManager = regionManager;
+
         AddTodoCommand = new DelegateCommand(ExecuteAddTodo);
         EditTodoCommand = new DelegateCommand<TodoItemDto>(ExecuteEditTodo);
         ToggleCompleteCommand = new DelegateCommand<TodoItemDto>(ExecuteToggleComplete);
         DeleteTodoCommand = new DelegateCommand<TodoItemDto>(ExecuteDeleteTodo);
-        FilterAllCommand = new DelegateCommand(() => CurrentFilter = TodoFilter.All);
-        FilterIncompleteCommand = new DelegateCommand(() => CurrentFilter = TodoFilter.Incomplete);
-        FilterCompletedCommand = new DelegateCommand(() => CurrentFilter = TodoFilter.Completed);
-        _loginToken = eventAggregator.GetEvent<UserLoggedInEvent>()
-            .Subscribe(p => { _userId = p.UserId; LoadTodos(); });
+        FilterAllCommand = new DelegateCommand(SetFilterAll);
+        FilterIncompleteCommand = new DelegateCommand(SetFilterIncomplete);
+        FilterCompletedCommand = new DelegateCommand(SetFilterCompleted);
+
+        _loginToken = eventAggregator
+            .GetEvent<UserLoggedInEvent>()
+            .Subscribe(OnUserLoggedIn);
+    }
+
+    private void SetFilterAll() => CurrentFilter = TodoFilter.All;
+    private void SetFilterIncomplete() => CurrentFilter = TodoFilter.Incomplete;
+    private void SetFilterCompleted() => CurrentFilter = TodoFilter.Completed;
+
+    private void OnUserLoggedIn(UserLoggedInEvent.Payload payload)
+    {
+        _userId = payload.UserId;
+        LoadTodos();
     }
 
     private void LoadTodos()
     {
-        if (_userId == 0) return;
-        IsLoading = true; ErrorMessage = null;
-        try { Todos.Clear(); foreach (var t in _todoManager.GetTodos(_userId, CurrentFilter)) Todos.Add(t); }
-        catch (Exception ex) { ErrorMessage = ex.Message; }
-        finally { IsLoading = false; }
+        if (_userId == 0)
+            return;
+
+        IsLoading = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var items = _todoManager.GetTodos(_userId, CurrentFilter);
+            Todos.Clear();
+            foreach (var item in items)
+                Todos.Add(item);
+        }
+        catch (Exception ex)
+        {
+            Logger.Error("加载任务失败", ex);
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     private void ExecuteAddTodo()
     {
-        var p = new NavigationParameters { { "userId", _userId } };
-        _regionManager.RequestNavigate("ContentRegion", "TodoEditView", p);
+        var parameters = new NavigationParameters { { "userId", _userId } };
+        _regionManager.RequestNavigate("ContentRegion", "TodoEditView", parameters);
     }
 
     private void ExecuteEditTodo(TodoItemDto todo)
     {
-        var p = new NavigationParameters { { "userId", _userId }, { "editTodo", todo } };
-        _regionManager.RequestNavigate("ContentRegion", "TodoEditView", p);
+        var parameters = new NavigationParameters
+        {
+            { "userId", _userId },
+            { "editTodo", todo }
+        };
+        _regionManager.RequestNavigate("ContentRegion", "TodoEditView", parameters);
     }
 
-    private void ExecuteToggleComplete(TodoItemDto t)
+    private void ExecuteToggleComplete(TodoItemDto todo)
     {
-        try { _todoManager.ToggleComplete(t.Id); LoadTodos(); }
-        catch (Exception ex) { ErrorMessage = ex.Message; }
+        try
+        {
+            _todoManager.ToggleComplete(todo.Id);
+            LoadTodos();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
     }
 
-    private void ExecuteDeleteTodo(TodoItemDto t)
+    private void ExecuteDeleteTodo(TodoItemDto todo)
     {
-        try { _todoManager.DeleteTodo(t.Id); Todos.Remove(t); }
-        catch (Exception ex) { ErrorMessage = ex.Message; }
+        try
+        {
+            _todoManager.DeleteTodo(todo.Id);
+            Todos.Remove(todo);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
     }
 
-    public void Dispose() { _loginToken?.Dispose(); }
+    public void Dispose()
+    {
+        _loginToken?.Dispose();
+    }
 }

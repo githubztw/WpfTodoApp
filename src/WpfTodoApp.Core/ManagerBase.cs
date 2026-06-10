@@ -7,15 +7,15 @@ namespace WpfTodoApp.Core;
 /// 2. 提供服务调用结果的标准处理
 /// 3. 避免 ViewModel 直接依赖 Service
 /// </summary>
-public abstract class ManagerBase
+public class ManagerBase
 {
     /// <summary>
-    /// 子类可重写以在构造函数完成后执行初始化
+    /// 子类可重写以在构造函数完成后执行初始化。
     /// </summary>
     protected virtual Task InitializeAsync() => Task.CompletedTask;
 
     /// <summary>
-    /// 统一错误处理：将异常转换为用户友好的错误消息
+    /// 统一错误处理：将异常转换为用户友好的错误消息。
     /// </summary>
     protected string HandleError(Exception ex)
     {

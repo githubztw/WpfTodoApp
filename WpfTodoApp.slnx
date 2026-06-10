@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/WpfTodoApp.Core/WpfTodoApp.Core.csproj" />
+    <Project Path="src/WpfTodoApp.Modules.Logging/WpfTodoApp.Modules.Logging.csproj" />
     <Project Path="src/WpfTodoApp.Modules.Login/WpfTodoApp.Modules.Login.csproj" />
     <Project Path="src/WpfTodoApp.Modules.TodoList/WpfTodoApp.Modules.TodoList.csproj" />
     <Project Path="src/WpfTodoApp.Modules.UserManagement/WpfTodoApp.Modules.UserManagement.csproj" />

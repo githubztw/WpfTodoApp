@@ -3,6 +3,10 @@ using WpfTodoApp.Core.Models;
 
 namespace WpfTodoApp.Services.Data;
 
+/// <summary>
+/// 应用数据库上下文。使用 SQLite 存储 Users 和 TodoItems。
+/// 首次创建时自动 seed admin 用户（密码 123456 的 BCrypt 哈希）。
+/// </summary>
 public class AppDbContext : DbContext
 {
     public DbSet<User> Users => Set<User>();

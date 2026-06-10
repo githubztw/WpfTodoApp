@@ -1,19 +1,16 @@
 <!--
   Sync Impact Report
   ==================
-  Version change: 1.1.1 → 1.1.2 (PATCH — strengthened single-startup rule)
+  Version change: 1.1.2 → 1.1.3 (PATCH — added Lambda avoidance + Statement formatting to Principle IV)
   Modified sections:
-    - Project Type Requirements: Added explicit "single startup" rule; clarified startup is
-      the ONE AND ONLY WPF Application project; all modules are WPF Class Library projects
+    - Principle IV: Added "Lambda avoidance" and "Statement formatting" rules
   Clarifications:
-    - Solution MUST contain exactly ONE WPF Application project (the startup/Shell)
-    - ALL module projects MUST be WPF Class Library projects — no module may be an
-      Application project
-    - Previously implied, now explicitly stated as a non-negotiable rule
+    - Lambda expressions MUST NOT be used where named methods suffice
+    - Each statement MUST occupy its own line (no multi-statement folding)
+    - Method calls MUST NOT be broken across lines unless >120 chars
+    - Only exception: Prism expression-tree lambdas (ObservesProperty)
   Removed sections: None
-  Templates requiring updates:
-    - specs/001-wpf-task-management/plan.md: ⚠ Pending (same as v1.1.1 note)
-    - specs/001-wpf-task-management/tasks.md: ⚠ Pending (same as v1.1.1 note)
+  Templates requiring updates: None
   Follow-up TODOs: None
 -->
 
@@ -116,11 +113,25 @@ All code MUST meet the following non-negotiable quality standards:
   branches MUST be removed before merge.
 - **DRY**: Duplicated logic beyond 3 lines MUST be extracted into a shared method
   or utility class.
+- **Lambda avoidance**: Lambda expressions MUST NOT be used where a named method
+  would suffice. Event handlers, command delegates, and factory methods MUST use
+  named methods rather than inline lambdas. The only permitted exception is
+  expression-tree lambdas required by framework APIs (e.g., `.ObservesProperty()`).
+- **Statement formatting**: Each statement MUST occupy its own line. Multiple
+  statements MUST NOT be folded onto a single line. Method calls MUST NOT be
+  unnecessarily broken across multiple lines unless exceeding 120 characters.
+  Single-statement `if`/`else` bodies MAY omit braces.
+- **Comment coverage**: Code comment rate MUST be ≥80%. Every public class,
+  interface, method, and property MUST have an XML documentation comment
+  (`/// <summary>`). Complex logic branches and non-obvious design decisions
+  MUST have inline explanatory comments. Only trivial getters/setters and
+  constructors that purely assign dependencies are exempt.
 
-**Rationale**: Code is read far more often than written. Lean, well-named code
-with minimal nesting reduces onboarding time, defect rates, and maintenance cost.
-Immutable patterns prevent a class of concurrency and state-management bugs common
-in WPF applications.
+**Rationale**: Code is read far more often than written. Named methods are
+self-documenting and searchable; lambdas obscure intent in call stacks and
+debugging. One-statement-per-line prevents visual clutter and makes diffs
+precise. High comment coverage ensures new team members can understand code
+without reverse-engineering intent.
 
 ### V. Performance & Testing
 
@@ -380,4 +391,4 @@ MAJOR.MINOR.PATCH
   PATCH — Clarifications, wording fixes, non-semantic refinements
 ```
 
-**Version**: 1.1.2 | **Ratified**: 2026-06-08 | **Last Amended**: 2026-06-08
+**Version**: 1.1.4 | **Ratified**: 2026-06-08 | **Last Amended**: 2026-06-09
