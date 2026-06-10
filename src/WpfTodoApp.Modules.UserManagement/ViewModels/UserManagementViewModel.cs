@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 using Prism.Commands;
 using WpfTodoApp.Core;
 using WpfTodoApp.Core.Dtos;
-using WpfTodoApp.Core.Interfaces;
+using WpfTodoApp.Modules.Logging;
 using WpfTodoApp.Modules.UserManagement.Managers;
 
 namespace WpfTodoApp.Modules.UserManagement.ViewModels;

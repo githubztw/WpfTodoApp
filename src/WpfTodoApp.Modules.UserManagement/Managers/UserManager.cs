@@ -1,5 +1,6 @@
 using WpfTodoApp.Core;
 using WpfTodoApp.Core.Dtos;
+using WpfTodoApp.Modules.Logging;
 using WpfTodoApp.Services.Interfaces;
 
 namespace WpfTodoApp.Modules.UserManagement.Managers;
@@ -11,7 +12,8 @@ public class UserManager : ManagerBase
 {
     private readonly IUserService _userService;
 
-    public UserManager(IUserService userService)
+    public UserManager(IUserService userService, ILogger logger)
+        : base(logger)
     {
         _userService = userService;
     }

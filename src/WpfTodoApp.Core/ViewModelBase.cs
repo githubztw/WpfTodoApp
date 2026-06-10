@@ -1,5 +1,5 @@
 using Prism.Mvvm;
-using WpfTodoApp.Core.Interfaces;
+using WpfTodoApp.Modules.Logging;
 
 namespace WpfTodoApp.Core;
 

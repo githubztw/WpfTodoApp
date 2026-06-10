@@ -1,11 +1,7 @@
-using WpfTodoApp.Core.Interfaces;
-using Serilog.Events;
-using ILogger = WpfTodoApp.Core.Interfaces.ILogger;
-
 namespace WpfTodoApp.Modules.Logging;
 
 /// <summary>
-/// 基于 Serilog 的日志实现。包装 Serilog.Log 静态类，实现 Core.Interfaces.ILogger 接口。
+/// 基于 Serilog 的日志实现。包装 Serilog.Log 静态类。
 /// 构造函数无需参数，日志输出目标由 Serilog 配置文件控制。
 /// </summary>
 public class SerilogLogger : ILogger

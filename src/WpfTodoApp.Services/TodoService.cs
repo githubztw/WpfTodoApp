@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using WpfTodoApp.Core.Dtos;
-using WpfTodoApp.Core.Interfaces;
+using WpfTodoApp.Modules.Logging;
 using WpfTodoApp.Core.Models;
 using WpfTodoApp.Services.Data;
 using WpfTodoApp.Services.Interfaces;

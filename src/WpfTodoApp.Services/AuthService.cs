@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Prism.Events;
 using WpfTodoApp.Core.Dtos;
 using WpfTodoApp.Core.Events;
-using WpfTodoApp.Core.Interfaces;
+using WpfTodoApp.Modules.Logging;
 using WpfTodoApp.Services.Data;
 using WpfTodoApp.Services.Interfaces;
 

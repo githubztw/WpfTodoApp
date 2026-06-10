@@ -2,6 +2,7 @@ using Prism.Events;
 using WpfTodoApp.Core;
 using WpfTodoApp.Core.Dtos;
 using WpfTodoApp.Core.Events;
+using WpfTodoApp.Modules.Logging;
 using WpfTodoApp.Services.Interfaces;
 
 namespace WpfTodoApp.Modules.Login.Managers;
@@ -14,7 +15,8 @@ public class LoginManager : ManagerBase
     private readonly IAuthService _authService;
     private readonly IEventAggregator _eventAggregator;
 
-    public LoginManager(IAuthService authService, IEventAggregator eventAggregator)
+    public LoginManager(IAuthService authService, IEventAggregator eventAggregator, ILogger logger)
+        : base(logger)
     {
         _authService = authService;
         _eventAggregator = eventAggregator;

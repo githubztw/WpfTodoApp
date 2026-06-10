@@ -4,7 +4,7 @@ using Prism.Events;
 using Prism.Regions;
 using WpfTodoApp.Core;
 using WpfTodoApp.Core.Events;
-using WpfTodoApp.Core.Interfaces;
+using WpfTodoApp.Modules.Logging;
 
 namespace WpfTodoApp.ViewModels;
 

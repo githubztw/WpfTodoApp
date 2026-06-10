@@ -1,8 +1,8 @@
-namespace WpfTodoApp.Core.Interfaces;
+namespace WpfTodoApp.Modules.Logging;
 
 /// <summary>
 /// 统一日志接口。所有模块通过此接口记录日志。
-/// 接口定义在 Core 中，具体实现在 WpfTodoApp.Modules.Logging。
+/// 接口定义在 Logging 模块中，避免模块间不必要的依赖。
 /// </summary>
 public interface ILogger
 {

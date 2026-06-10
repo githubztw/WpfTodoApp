@@ -3,7 +3,7 @@ using Prism.Events;
 using Prism.Ioc;
 using WpfTodoApp.Core.Dtos;
 using WpfTodoApp.Core.Events;
-using WpfTodoApp.Core.Interfaces;
+using WpfTodoApp.Modules.Logging;
 using WpfTodoApp.Services.Data;
 using WpfTodoApp.Services.Interfaces;
 

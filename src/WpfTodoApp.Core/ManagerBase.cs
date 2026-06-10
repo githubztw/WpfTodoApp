@@ -1,3 +1,5 @@
+using WpfTodoApp.Modules.Logging;
+
 namespace WpfTodoApp.Core;
 
 /// <summary>
@@ -9,10 +11,11 @@ namespace WpfTodoApp.Core;
 /// </summary>
 public class ManagerBase
 {
-    /// <summary>
-    /// 子类可重写以在构造函数完成后执行初始化。
-    /// </summary>
-    protected virtual Task InitializeAsync() => Task.CompletedTask;
+    protected ILogger Logger { get; }
+    public ManagerBase(ILogger logger)
+    {
+        Logger = logger;
+    }
 
     /// <summary>
     /// 统一错误处理：将异常转换为用户友好的错误消息。

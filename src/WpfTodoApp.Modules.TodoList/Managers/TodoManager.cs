@@ -1,6 +1,7 @@
 using WpfTodoApp.Core;
 using WpfTodoApp.Core.Dtos;
 using WpfTodoApp.Core.Models;
+using WpfTodoApp.Modules.Logging;
 using WpfTodoApp.Services.Interfaces;
 
 namespace WpfTodoApp.Modules.TodoList.Managers;
@@ -12,7 +13,8 @@ public class TodoManager : ManagerBase
 {
     private readonly ITodoService _todoService;
 
-    public TodoManager(ITodoService todoService)
+    public TodoManager(ITodoService todoService, ILogger logger)
+        : base(logger)
     {
         _todoService = todoService;
     }

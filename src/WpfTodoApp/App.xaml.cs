@@ -50,7 +50,7 @@ public partial class App : PrismApplication
             .CreateLogger();
 
         var logger = new Modules.Logging.SerilogLogger();
-        containerRegistry.RegisterInstance<Core.Interfaces.ILogger>(logger);
+        containerRegistry.RegisterInstance<Modules.Logging.ILogger>(logger);
         logger.Info($"=== TaskFlow 启动 (环境: {env}) ===");
 
         // === 绑定各模块配置类并注册到 DI ===
