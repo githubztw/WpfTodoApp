@@ -1,0 +1,96 @@
+name: DeepSeek PR Review
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+# 同一PR新提交取消旧任务
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    # 执行条件不变：PR事件 或 评论包含@deepseek
+    if: |
+      github.event_name == 'pull_request' ||
+      contains(github.event.comment.body, '@deepseek')
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    env:
+      # DeepSeek API 配置，密钥在仓库Secrets添加 DEEPSEEK_API_KEY
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      DEEPSEEK_API_URL: https://api.deepseek.com/v1/chat/completions
+      DEEPSEEK_MODEL: deepseek-coder-v2
+    steps:
+      - name: 拉取完整代码仓库
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 安装jq（解析API返回JSON）
+        run: sudo apt update && sudo apt install -y jq
+
+      - name: 获取PR完整代码Diff
+        id: get_diff
+        run: |
+          # 获取当前PR所有代码变更
+          git diff origin/${{ github.base_ref }}...HEAD > pr.diff
+          DIFF_CONTENT=$(cat pr.diff)
+          # 存入环境变量，传给后续步骤
+          echo "DIFF<<EOF" >> $GITHUB_ENV
+          echo "$DIFF_CONTENT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: 调用DeepSeek生成代码评审报告
+        id: ai_review
+        run: |
+          # 评审Prompt，完全沿用原Claude的检查要求、输出格式
+          SYS_PROMPT="你是资深代码安全评审工程师，严格按照要求审查代码变更，只输出指定Markdown格式，不要多余解释。
+检查维度：
+1. 安全漏洞（SQL注入、XSS、密钥硬编码、越权等）
+2. 异常、边界条件缺失
+3. 性能隐患（N+1、内存泄漏、低效循环）
+输出固定格式：
+## 审查报告
+### Critical（必须修复）
+### Warning（建议修复）
+### Suggestion（可选优化）"
+
+          USER_PROMPT="以下是本次PR的代码diff，请完成评审：${{ env.DIFF }}"
+
+          # 构造API请求JSON
+          PAYLOAD=$(jq -n \
+            --arg sys "$SYS_PROMPT" \
+            --arg user "$USER_PROMPT" \
+            '{
+              model: env.MODEL,
+              messages: [
+                {role: "system", content: $sys},
+                {role: "user", content: $user}
+              ],
+              temperature: 0.2,
+              max_tokens: 2000
+            }')
+
+          # 请求DeepSeek接口
+          RESP=$(curl -s "$DEEPSEEK_API_URL" \
+            -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD")
+
+          # 提取AI返回的评审文本
+          REVIEW_RESULT=$(echo "$RESP" | jq -r '.choices[0].message.content')
+          echo "REVIEW<<EOF" >> $GITHUB_ENV
+          echo "$REVIEW_RESULT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: 在PR页面发布AI评审评论
+        run: |
+          gh pr review ${{ github.event.pull_request.number }} \
+            --body "${{ env.REVIEW }}" \
+            --comment
